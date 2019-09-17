@@ -7,10 +7,9 @@
 //
 
 import UIKit
+import Cards
 
-class CardContentViewController: UIViewController {
-
-    
+class ContentViewController: CardDetailViewController {
     let colors = [
         
         UIColor.red,
@@ -23,14 +22,11 @@ class CardContentViewController: UIViewController {
         
     ]
     
-    override func viewDidLoad() {
-        print("Loaded!")
-    }
     
     @IBAction func doMagic(_ sender: Any) {
         
-        view.backgroundColor = colors[Int(arc4random_uniform(UInt32(colors.count)))]
-        
+        let controller = storyboard?.instantiateViewController(withIdentifier: "\(ListTableViewController.self)") as! ListTableViewController
+        navigationController?.pushViewController(controller, animated: true)
         
     }
     

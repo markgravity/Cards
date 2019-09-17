@@ -9,10 +9,13 @@
 import UIKit
 import Cards
 
-class ListTableViewController: UITableViewController {
+class ListTableViewController: UITableViewController, CardContentProvider {
+    var card: Card!
+    var scrollView: UIScrollView!
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        scrollView = tableView
         
     }
 
@@ -34,7 +37,7 @@ class ListTableViewController: UITableViewController {
         let card = cell.viewWithTag(1000) as! CardArticle
         let cardContent = storyboard!.instantiateViewController(withIdentifier: "CardContent")
         
-        card.shouldPresent(cardContent, from: self, fullscreen: true)
+        card.shouldPresent(cardContent as! CardContentViewController, from: self, fullscreen: true)
         return cell
     }
     

@@ -17,7 +17,7 @@ class ArticleViewController: UIViewController {
         super.viewDidLoad()
         
         let cardContent = storyboard?.instantiateViewController(withIdentifier: "CardContent")
-        card.shouldPresent(cardContent, from: self)
+        card.shouldPresent(cardContent as! CardContentViewController, from: self)
         
         
     }

@@ -95,24 +95,32 @@ import UIKit
      contentViewController  -> The view controller to present when the card is tapped
      from                   -> Your current ViewController (self)
      */
-    public func shouldPresent( _ contentViewController: UIViewController?, from superVC: UIViewController?, fullscreen: Bool = false) {
-        if detailVC.children.count > 0{
-            let viewControllers:[UIViewController] = detailVC.children
+    public func shouldPresent( _ contentViewController: CardContentViewController, from superVC: UIViewController?, fullscreen: Bool = false) {
+        
+        containerVC = CardContainerViewController(rootViewController: contentViewController)
+        let containerVC = self.containerVC!
+        
+        
+        // Remove previous childs
+        if containerVC.children.count > 0{
+            let viewControllers:[UIViewController] = containerVC.children
             for viewContoller in viewControllers{
                 viewContoller.willMove(toParent: nil)
                 viewContoller.view.removeFromSuperview()
                 viewContoller.removeFromParent()
             }
         }
-        detailVC.isViewAdded = false
-        if let content = contentViewController{
-            self.superVC = superVC
-            detailVC.addChild(content)
-            detailVC.detailView = content.view
-            detailVC.card = self
-            detailVC.delegate = self.delegate
-            detailVC.isFullscreen = fullscreen
-        }
+        
+        // Config Container View Controller
+        containerVC.transitioningDelegate = self
+        containerVC.isViewAdded = false
+        containerVC.card = self
+        containerVC.delegate = self.delegate
+        containerVC.isFullscreen = fullscreen
+        
+        contentViewController.card = self
+        self.superVC = superVC
+        
     }
     /**
      If the card should display parallax effect.
@@ -134,7 +142,7 @@ import UIKit
     
     //Private Vars
     fileprivate var tap = UITapGestureRecognizer()
-    var detailVC = DetailViewController()
+    var containerVC: CardContainerViewController?
     weak var superVC: UIViewController?
     var originalFrame = CGRect.zero
     public var backgroundIV = UIImageView()
@@ -160,8 +168,6 @@ import UIKit
         self.addGestureRecognizer(tap)
         tap.delegate = self
         tap.cancelsTouchesInView = false
-       
-        detailVC.transitioningDelegate = self
         
         // Adding Subviews
         self.addSubview(backgroundIV)
@@ -216,9 +222,10 @@ import UIKit
         self.delegate?.cardDidTapInside?(card: self)
         resetAnimated()
         
-        if let vc = superVC {
+        if let vc = superVC,
+            let containerVC = containerVC {
             log("CARD: Card tapped, Presenting DetailViewController")
-            vc.present(self.detailVC, animated: true, completion: nil)
+            vc.present(containerVC, animated: true, completion: nil)
         }
     }
 
@@ -291,7 +298,7 @@ extension Card: UIGestureRecognizerDelegate {
 }
 
 
-	//MARK: - Helpers
+//MARK: - Helpers
 
 extension Card {
     
@@ -299,6 +306,24 @@ extension Card {
         if self.isDebug { print(message) }
     }
     
+}
+
+//MARK: - Navigation
+
+public extension Card {
+    
+    func pushViewController(_ viewController: CardContentViewController, animated: Bool) {
+        viewController.card = self
+        containerVC?.pushViewController(viewController, animated: animated)
+    }
+    
+    func popViewController(animated: Bool) {
+        containerVC?.popViewController(animated: animated)
+    }
+    
+    func popToRootViewController(animated: Bool) {
+        containerVC?.popToRootViewController(animated: animated)
+    }
 }
 
 extension UILabel {
